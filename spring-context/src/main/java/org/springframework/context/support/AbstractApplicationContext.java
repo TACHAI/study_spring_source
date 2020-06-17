@@ -607,8 +607,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * active flag as well as performing any initialization of property sources.
 	 */
 	protected void prepareRefresh() {
+		// 记录初始化开始时间
 		this.startupDate = System.currentTimeMillis();
+		// context是否关闭的标志，设置flase(开启标记)
 		this.closed.set(false);
+		// context是否激活的标记，设置为true
 		this.active.set(true);
 
 		if (logger.isInfoEnabled()) {
@@ -616,14 +619,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Initialize any placeholder property sources in the context environment
+		// 留给子类实现的空方法
 		initPropertySources();
 
 		// Validate that all properties marked as required are resolvable
 		// see ConfigurablePropertyResolver#setRequiredProperties
+		//		AbstractPropertyResolver类的requiredProperties是个集合，
+	    //		在下面的validateRequeiredProperties()方法中，都要拿requiredProperties中的元素作为key去检查是否存在对应的环境变量。
+	    //		如果不存在就抛出异常
 		getEnvironment().validateRequiredProperties();
 
 		// Allow for the collection of early ApplicationEvents,
 		// to be published once the multicaster is available...
+		//允许收集早期的ApplicationEvents，一旦多播可用，将发布
 		this.earlyApplicationEvents = new LinkedHashSet<>();
 	}
 
