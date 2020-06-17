@@ -519,7 +519,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		synchronized (this.startupShutdownMonitor) {
 			// Prepare this context for refreshing.
             // STEP 1： 刷新预处理
-			//
+			// 准备工作：例如记录事件，设置标志，检查环境变量，并有留给子类扩展的位置，用来将属性加入到ApplicationContext中
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
@@ -531,11 +531,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 			// Prepare the bean factory for use in this context.
             // STEP 3： 对IoC容器进行一些预处理（设置一些公共属性）
+			//  对beanFactory做一些设置，例如类加载器，指定bean的某些类型的成员变量对应某些对象等
 			prepareBeanFactory(beanFactory);
 
 			try {
 				// Allows post-processing of the bean factory in context subclasses.
-                // STEP 4： 
+                // STEP 4： 子类扩展用，可以设置bean的后置处理器（bean在实例化之后这些后置处理器会执行）
 				postProcessBeanFactory(beanFactory);
 
 				// Invoke factory processors registered as beans in the context.
@@ -543,7 +544,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
                 invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
-				// STEP 6： 注册BeanPostProcessor后置处理器
+				// STEP 6： 注册BeanPostProcessor后置处理器   将所有的bean的后置处理器排行序，但不会马上用，bean实例化后会用到
                 registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
@@ -555,7 +556,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
                 initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
-				// STEP 9： 初始化一些特殊的bean
+				// STEP 9： 初始化一些特殊的bean  空方法，留给子类自己实现，在实例化bean之前做一些ApplicationContext
                 onRefresh();
 
 				// Check for listener beans and register them.
@@ -569,6 +570,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				// Last step: publish corresponding event.
 				// STEP 12： 完成刷新时，需要发布对应的事件
+				// applicationContext刷新完成后的处理，例如生命周期监听器的回调，广播通知等
                 finishRefresh();
 			}
 
@@ -579,18 +581,22 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				}
 
 				// Destroy already created singletons to avoid dangling resources.
+				//  刷新失败后的处理，主要是将一些保存环境信息的集合做清理
 				destroyBeans();
 
 				// Reset 'active' flag.
+				// 重置“活动”标志
 				cancelRefresh(ex);
 
 				// Propagate exception to caller.
+				// 将异常传播到调用方
 				throw ex;
 			}
 
 			finally {
 				// Reset common introspection caches in Spring's core, since we
 				// might not ever need metadata for singleton beans anymore...
+				// 重置spring核心的常见内省缓存，因为我们可能永远不会
 				resetCommonCaches();
 			}
 		}
